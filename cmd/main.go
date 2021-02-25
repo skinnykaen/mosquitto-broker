@@ -19,9 +19,11 @@ func LoginHandler (w http.ResponseWriter, r *http.Request)  {
 
 	w.WriteHeader(http.StatusOK)
 	var email = vars["email"]
+	//хочу вывести vars
 	for k, v := range vars {
 		log.Println("key: %d, value: %t\n", k, v)
 	}
+
 	if(checkemail(email)) {
 		fmt.Fprint(w, "hello")
 	}else {
@@ -42,8 +44,9 @@ func checkemail (email string) bool{
 	for (results.Next()) {
 		var user Go.User
 		err = results.Scan(&user.Id, &user.Email)
-		log.Println(user.Email)
-		log.Println(email)
+		log.Println(user.Email) // из базы данных где лежит один email tortancs@mail.ru
+		log.Println(email) // из формы
+		// получается false потому что email пустая
 		if(user.Email == email) {
 			return true
 		}
