@@ -2,53 +2,60 @@ package main
 
 import (
 	"database/sql"
-
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-
-	"log"
-
-	"github.com/skinnykaen/go.git/package/handler"
-	"github.com/skinnykaen/go.git/repository"
-	"github.com/skinnykaen/go.git/service"
-
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	Go "github.com/skinnykaen/go.git"
+	"log"
+	"net/http"
+	//"encoding/json"
 )
 
-func main() {
-	db, err := sql.Open("mysql", "root:12345@tcp(127.0.0.1:3306)/users")
+var rooter *mux.Router
+
+func LoginHandler (w http.ResponseWriter, r *http.Request)  {
+	vars := mux.Vars(r)
+
+	w.WriteHeader(http.StatusOK)
+	var email = vars["email"]
+	for k, v := range vars {
+		log.Println("key: %d, value: %t\n", k, v)
+	}
+	if(checkemail(email)) {
+		fmt.Fprint(w, "hello")
+	}else {
+		fmt.Fprint(w,"no enter")
+	}
+}
+
+func checkemail (email string) bool{
+	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
 
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
 
-	results, err := db.Query("SELECT id, email FROM users")
-	var users Go.User
-
-	for results.Next() {
-
-		err = results.Scan(&users.Id, &users.Email)
-		if err != nil {
-			panic(err.Error()) // proper error handling instead of panic in your app
+	results, err := db.Query("SELECT * from users ")
+	defer results.Close()
+	for (results.Next()) {
+		var user Go.User
+		err = results.Scan(&user.Id, &user.Email)
+		log.Println(user.Email)
+		log.Println(email)
+		if(user.Email == email) {
+			return true
 		}
-
-		log.Printf(users.Email)
 	}
+	return false
+}
 
-	err = db.QueryRow("SELECT id, email FROM users where id = ?", 1).Scan(&users.Id, &users.Email)
-	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
-	}
+func main() {
+	rooter := mux.NewRouter()
+	rooter.HandleFunc("/hello", LoginHandler).Methods("GET")
+	http.Handle("/", rooter)
+	handler := cors.New(cors.Options{AllowedOrigins: []string{"http://127.0.0.1", "http://localhost:3000"}}).Handler(rooter)
+	log.Fatal(http.ListenAndServe(":8000", handler))
 
-	log.Println(users.Id)
-	log.Println(users.Email)
-
-	repos := repository.NewRepository()
-	services := service.NewService(repos)
-	handlers := handler.NewHandler(services)
-
-	srv := new(Go.Server)
-	if err := srv.Run("3000", handlers.InitRoutes()); err != nil {
-		log.Fatalf("error occured while running http server: %s", err.Error())
-	}
 }
