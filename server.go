@@ -1,27 +1,46 @@
 package Go
 
 import (
-	"context"
+	"encoding/json"
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
+	"log"
 	"net/http"
-	"time"
 )
 
 type Server struct {
-	httpServer *http.Server
+	*mux.Router
 }
 
-func (s *Server) Run(port string, handler http.Handler) error {
-	s.httpServer = &http.Server{
-		Addr:           ":" + port,
-		Handler:        handler,
-		MaxHeaderBytes: 1 << 20,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 & time.Second,
+func LoginHandler (w http.ResponseWriter, r *http.Request)  {
+	w.Header().Set("Content-Type", "application/json")
+	var user User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	log.Println(user.UserData.Email, user.Id)
+	if err != nil {
+		panic(err.Error())
 	}
-
-	return s.httpServer.ListenAndServe()
+	email :=user.UserData.Email
+	if(checkemail(email)) {
+		json.NewEncoder(w).Encode("hello")
+	}else {
+		json.NewEncoder(w).Encode("no enter")
+	}
 }
 
-func (s *Server) Shutdown(ctx context.Context) error {
-	return s.httpServer.Shutdown(ctx)
+func (s *Server) routes (){
+	//s.HandleFunc("/", IndexPageHandler)
+	//s.HandleFunc("/internal", InternalPageHandler)
+
+	s.HandleFunc("/login", LoginHandler).Methods("POST")
+	//s.HandleFunc("/logout", LogoutHandler).Methods("POST")
 }
+
+func NewServer() http.Handler {
+	s := &Server{
+		Router : mux.NewRouter(),
+	}
+	handler := cors.New(cors.Options{AllowedOrigins: []string{"http://127.0.0.1", "http://localhost:3000"}}).Handler(s)
+	return handler
+}
+
