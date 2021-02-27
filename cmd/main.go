@@ -2,32 +2,30 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	Go "github.com/skinnykaen/go.git"
 	"log"
 	"net/http"
-	//"encoding/json"
 )
 
 var rooter *mux.Router
 
 func LoginHandler (w http.ResponseWriter, r *http.Request)  {
-	vars := mux.Vars(r)
-
-	w.WriteHeader(http.StatusOK)
-	var email = vars["email"]
-	//хочу вывести vars
-	for k, v := range vars {
-		log.Println("key: %d, value: %t\n", k, v)
+	w.Header().Set("Content-Type", "application/json")
+	var user Go.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	log.Println(user.Email, user.Id)
+	if err != nil {
+		panic(err.Error())
 	}
-
+	email :=user.Email
 	if(checkemail(email)) {
-		fmt.Fprint(w, "hello")
+		json.NewEncoder(w).Encode("hello")
 	}else {
-		fmt.Fprint(w,"no enter")
+		json.NewEncoder(w).Encode("suck my pipe")
 	}
 }
 
@@ -45,7 +43,7 @@ func checkemail (email string) bool{
 		var user Go.User
 		err = results.Scan(&user.Id, &user.Email)
 		log.Println(user.Email) // из базы данных где лежит один email tortancs@mail.ru
-		log.Println(email) // из формы
+
 		// получается false потому что email пустая
 		if(user.Email == email) {
 			return true
@@ -56,9 +54,11 @@ func checkemail (email string) bool{
 
 func main() {
 	rooter := mux.NewRouter()
-	rooter.HandleFunc("/hello", LoginHandler).Methods("GET")
-	http.Handle("/", rooter)
+	rooter.HandleFunc("/hello", LoginHandler).Methods("POST")
 	handler := cors.New(cors.Options{AllowedOrigins: []string{"http://127.0.0.1", "http://localhost:3000"}}).Handler(rooter)
-	log.Fatal(http.ListenAndServe(":8000", handler))
+	http.ListenAndServe(":8000", handler)
+
+	//srv := Go.NewServer()
+	//log.Fatal(http.ListenAndServe(":8000", srv))
 
 }
