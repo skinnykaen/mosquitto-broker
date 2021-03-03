@@ -51,7 +51,6 @@ type Server struct {
 
 func RegistrationHandler (w http.ResponseWriter, r *http.Request) {
 	var user User
-	var redirectTarget string = "/"
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -60,59 +59,31 @@ func RegistrationHandler (w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 
-	email :=user.UserData.Email
-	password := user.UserData.PasswordHash
-
-	if(NewUser(email, password)){
-		json.NewEncoder(w).Encode("hello new user")
-	}else {
-		json.NewEncoder(w).Encode("user exist")
-	}
-	http.Redirect(w, r, redirectTarget, 302)
+	json.NewEncoder(w).Encode(NewUser(user.UserData.Email, user.UserData.PasswordHash))
 }
 
-func NewUser (email string, password string) bool {
-	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
-
-	if(!checkuser(email, password)){
-		return false
-	}
-
-	result2, err := db.Exec("INSERT INTO users (email, passwordhash) values (?, ?)", email, password)
-	log.Print(result2)
-	if err != nil {
-		panic(err.Error())
-	}
-	return true
-}
-
-func checkuser(email string, password string) bool{
+func NewUser (emailForm string, passwordForm string) string{
+	const res1 = "success"
+	const res2  = "email_already_exists"
+	var found bool
 
 	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
 
+	found, _ = FoundEmail(emailForm)
+	if(found){
+		return res2
+	}
+
+	results, err := db.Exec("INSERT INTO users (email, passwordhash) values (?, ?)", emailForm, passwordForm)
+	log.Print(results)
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
-
-	results, err := db.Query("SELECT * from users ")
-	defer results.Close()
-
-	for (results.Next()) {
-		var user User
-		err = results.Scan(&user.Id, &user.UserData.Email, &user.UserData.PasswordHash)
-		if(email != "" && password != "") {
-			if(user.UserData.Email == email){
-				return false
-			}
-		}
-	}
-	return true
+	return res1
 }
 
 func LoginHandler (w http.ResponseWriter, r *http.Request)  {
 	var user User
-	var redirectTarget string = "/"
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -121,21 +92,32 @@ func LoginHandler (w http.ResponseWriter, r *http.Request)  {
 		panic(err.Error())
 	}
 
-	email :=user.UserData.Email
-	password := user.UserData.PasswordHash
-
-	if(checkemail(email, password)) {
-		json.NewEncoder(w).Encode("hello")
-		redirectTarget = "google.com"
-	}else {
-		json.NewEncoder(w).Encode("no enter")
-	}
-	http.Redirect(w, r, redirectTarget, 302)
+	json.NewEncoder(w).Encode(CheckEmail(user.UserData.Email, user.UserData.PasswordHash))
 }
 
-func checkemail (email string, password string) bool{
-	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
+func CheckEmail (emailForm string, passwordForm string) string{
+	const res1 = "success"
+	const res2  = "not_found_email"
+	const res3 = "invalid_password"
 
+	var found bool
+	var passwordhashDb string
+
+	found,passwordhashDb = FoundEmail(emailForm)
+	if(found){
+		if(passwordhashDb == passwordForm) {
+			return res1
+		}else {
+			return res3
+		}
+	}else {
+		return res2
+	}
+	return "error"
+}
+
+func FoundEmail (emailForm string) (bool, string) {
+	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -143,17 +125,15 @@ func checkemail (email string, password string) bool{
 
 	results, err := db.Query("SELECT * from users ")
 	defer results.Close()
+	var user User
 
 	for (results.Next()) {
-		var user User
 		err = results.Scan(&user.Id, &user.UserData.Email, &user.UserData.PasswordHash)
-		if(email != "" && password != "") {
-			if(user.UserData.Email == email && user.UserData.PasswordHash == password){
-				return true
-			}
+		if(user.UserData.Email == emailForm){
+			return true, user.UserData.PasswordHash
 		}
 	}
-	return false
+	return false, user.UserData.PasswordHash
 }
 
 func (s *Server) routes (){
