@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 	u "github.com/skinnykaen/go.git/utils"
 	"strings"
@@ -12,7 +13,7 @@ import (
 var jwtKey = []byte("my_secret_key")
 
 var JwtAuthentication = func(next http.Handler) http.Handler {
-
+	fmt.Println("jwt auth begin")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		notAuth := []string{"/", "/registration" , "/login"}
@@ -32,15 +33,17 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 		if tokenHeader == "" { //Токен отсутствует, возвращаем  403 http-код Unauthorized
 			response = u.Message(false, "Missing auth token")
+			fmt.Println("Missing auth token")
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			u.Respond(w, response)
 			return
 		}
-
+		fmt.Println("here jwt auth")
 		splitted := strings.Split(tokenHeader, " ") //`Bearer {token-body}`,  соответствует ли полученный токен этому требованию
 		if len(splitted) != 2 {
 			response = u.Message(false, "Invalid/Malformed auth token")
+			fmt.Println("Invalid/Malformed auth token")
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			u.Respond(w, response)
@@ -56,6 +59,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 		if err != nil { //Неправильный токен, как правило, возвращает 403 http-код
 			response = u.Message(false, "Malformed authentication token")
+			fmt.Println("Malformed authentication token")
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			u.Respond(w, response)
@@ -64,14 +68,15 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 		if !token.Valid { //токен недействителен, возможно, не подписан на этом сервере
 			response = u.Message(false, "Token is not valid.")
+			fmt.Println("Token is not valid.")
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			u.Respond(w, response)
 			return
 		}
-
 		//Всё прошло хорошо, продолжаем выполнение запроса
 		//fmt.Sprintf("User %", tk.Username)
+		fmt.Println("Succes!")
 		ctx := context.WithValue(r.Context(), "user", tk.UserId)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r) //передать управление следующему обработчику

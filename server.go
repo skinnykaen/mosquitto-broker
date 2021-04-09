@@ -13,13 +13,15 @@ type Server struct {
 }
 
 func (s *Server) routes (){
-	s.Use(app.JwtAuthentication)
-
 	s.HandleFunc("/registration",
 		controllers.CreateAccount).Methods("POST")
 
 	s.HandleFunc("/login",
 		controllers.Authenticate).Methods("POST")
+
+	s.HandleFunc("/me",
+		controllers.Me).Methods("GET", "OPTIONS")
+
 }
 
 func NewServer() http.Handler {
@@ -27,8 +29,9 @@ func NewServer() http.Handler {
 		Router : mux.NewRouter(),
 	}
 	s.routes()
+	s.Use(app.JwtAuthentication)
 
-	handler := cors.New(cors.Options{AllowedOrigins: []string{"http://127.0.0.1", "http://localhost:3000"}}).Handler(s)
+	handler := cors.New(cors.Options{AllowedOrigins: []string{"http://127.0.0.1", "http://localhost:3000"}, AllowCredentials: true,}).Handler(s)
 	return handler
 }
 
