@@ -9,11 +9,10 @@ import (
 )
 
 var Me = func(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("wsup")
+	user := &models.User{}
 	id := r.Context().Value("user").(uint)
 	fmt.Println(id)
-	resp := u.Message(true, "success")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	resp := user.GetsUserInfo(id);
 	u.Respond(w, resp)
 }
 

@@ -77,28 +77,6 @@ func Login (email, password string) (map[string]interface{}) {
 
 	switch CheckEmail(user) {
 	case res1:
-		{
-			//expirationTime := time.Now().Add(5 * time.Minute)
-			//claims := &models.Token{
-			//	Username: user.UserData.Email,
-			//	StandardClaims: jwt.StandardClaims{
-			//		ExpiresAt: expirationTime.Unix(),
-			//	},
-			//}
-			//token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-			//tokenString, err := token.SignedString(jwtKey)
-			//if err != nil {
-			//	w.WriteHeader(http.StatusInternalServerError)
-			//	return
-			//}
-			//http.SetCookie(w, &http.Cookie{
-			//	Name:    "token",
-			//	Value:   tokenString,
-			//	Expires: expirationTime,
-			//})
-			//Welcome(w,r)
-		}
-
 		user.UserData.Email = email
 		user.UserData.PasswordHash = ""
 
@@ -154,4 +132,30 @@ func FoundEmail (emailForm string) (bool, uint, string) {
 		}
 	}
 	return false, 0, ""
+}
+
+func (user *User) GetsUserInfo(id uint) (map[string]interface{}) {
+	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	results, err := db.Query("SELECT * from users ")
+	defer results.Close()
+
+	for (results.Next()) {
+		err = results.Scan(&user.Id, &user.UserData.Email, &user.UserData.PasswordHash)
+		fmt.Println("from controllers")
+		fmt.Println(id)
+		fmt.Println("from data base")
+		fmt.Println(user.Id)
+		if(user.Id == id){
+			resp := u.Message(true, "user exist")
+			resp["user"] = user
+			return resp;
+		}
+	}
+	fmt.Println("eroor")
+	return u.Message(false, "error")
 }
