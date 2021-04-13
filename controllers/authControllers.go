@@ -11,7 +11,7 @@ import (
 var Me = func(w http.ResponseWriter, r *http.Request) {
 	user := &models.User{}
 	id := r.Context().Value("user").(uint)
-	fmt.Println(id)
+
 	resp := user.GetsUserInfo(id);
 	u.Respond(w, resp)
 }

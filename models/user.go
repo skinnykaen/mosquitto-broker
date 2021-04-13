@@ -146,16 +146,12 @@ func (user *User) GetsUserInfo(id uint) (map[string]interface{}) {
 
 	for (results.Next()) {
 		err = results.Scan(&user.Id, &user.UserData.Email, &user.UserData.PasswordHash)
-		fmt.Println("from controllers")
-		fmt.Println(id)
-		fmt.Println("from data base")
-		fmt.Println(user.Id)
 		if(user.Id == id){
 			resp := u.Message(true, "user exist")
 			resp["user"] = user
-			return resp;
+			return resp
 		}
 	}
-	fmt.Println("eroor")
+	fmt.Println("erorr")
 	return u.Message(false, "error")
 }
