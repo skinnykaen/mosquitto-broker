@@ -56,15 +56,12 @@ func (topic *Topic) GetList (id_user uint) (map[string]interface{}) {
 	}
 	defer db.Close()
 
-	results, err := db.Query("SELECT * from topics ")
+	results, err := db.Query("SELECT * from topics")
 	defer results.Close()
 
-
-	fmt.Println("error in GetList")
-	
 	for (results.Next()) {
-		err = results.Scan(&topic.Id_User, &topic.Name, &topic.Password)
-		fmt.Println(topic.Id_User)
+		err = results.Scan(&topic.Id, &topic.Name, &topic.Password, &topic.Mqqt_Tcp_Port, &topic.Secure_mqtt, &topic.Mqtt_Over_Websocket_Port, &topic.Id_User)
+		fmt.Println(topic.Name)
 		if(topic.Id_User == id_user){
 			resp := u.Message(true, "topic exist")
 			resp["topic"] = topic

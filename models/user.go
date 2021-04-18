@@ -147,11 +147,11 @@ func (user *User) GetsUserInfo(id uint) (map[string]interface{}) {
 	for (results.Next()) {
 		err = results.Scan(&user.Id, &user.UserData.Email, &user.UserData.PasswordHash)
 		if(user.Id == id){
-			resp := u.Message(true, "user exist")
+			resp := u.Message(true, "GetsUserInfo success")
 			resp["user"] = user
 			return resp
 		}
 	}
 	fmt.Println("erorr")
-	return u.Message(false, "error")
+	return u.Message(false, "GetsUserInfo error")
 }

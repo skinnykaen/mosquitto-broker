@@ -13,10 +13,10 @@ import (
 var jwtKey = []byte("my_secret_key")
 
 var JwtAuthentication = func(next http.Handler) http.Handler {
-	fmt.Println("jwt auth begin")
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		notAuth := []string{"/", "/registration" , "/login" , "/create_topic", "/list_topics"}
+		notAuth := []string{"/", "/registration" , "/login"}
 		requestPath := r.URL.Path
 
 		//проверяем, не требует ли запрос аутентификации, обслуживаем запрос, если он не нужен

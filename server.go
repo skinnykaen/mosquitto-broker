@@ -25,8 +25,8 @@ func (s *Server) routes (){
 	s.HandleFunc("/create_topic",
 		controllers.CreateTopic).Methods("POST")
 
-	s.HandleFunc("/list_topics",
-		controllers.GetListTopic).Methods("GET")
+	s.HandleFunc("/topics",
+		controllers.GetListTopics).Methods("GET", "OPTIONS")
 }
 
 func NewServer() http.Handler {

@@ -22,9 +22,10 @@ var CreateTopic = func(w http.ResponseWriter, r *http.Request) {
 	u.Respond(w, resp)
 }
 
-var GetListTopic = func(w http.ResponseWriter, r *http.Request) {
+var GetListTopics = func(w http.ResponseWriter, r *http.Request) {
 	topic := &models.Topic{}
 	id := r.Context().Value("user").(uint)
+	fmt.Println(id)
 	resp := topic.GetList(id);
 	u.Respond(w, resp)
 }
