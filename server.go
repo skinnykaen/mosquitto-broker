@@ -27,6 +27,9 @@ func (s *Server) routes (){
 
 	s.HandleFunc("/topics",
 		controllers.GetListTopics).Methods("GET", "OPTIONS")
+
+	s.HandleFunc("/delete_topic",
+		controllers.DeleteTopic).Methods("DELETE")
 }
 
 func NewServer() http.Handler {

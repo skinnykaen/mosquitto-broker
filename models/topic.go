@@ -33,10 +33,21 @@ func (topic *Topic) Create () (map[string]interface{}){
 	return response
 }
 
-// func (topic *Topic) Delete (id_user uint, id_topic uint) (map[string]interface{}){
-// 	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
+func (topic *Topic) Delete () (map[string]interface{}){
+	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
 
-// }
+	topics, err := db.Exec("DELETE from topics where name=?", topic.TopicData.Name)
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Println(topics)
+	response := u.Message(true, "Topic has been delete")
+	return response
+}
 
 func (topic *Topic) GetList (id_user uint) ([]*Topic) {
 	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")

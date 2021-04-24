@@ -8,6 +8,19 @@ import (
 	"net/http"
 )
 
+var DeleteTopic = func(w http.ResponseWriter, r *http.Request) {
+	topic := &models.Topic{}
+	err := json.NewDecoder(r.Body).Decode(topic)
+	fmt.Println(topic.TopicData.Name)
+	if err != nil {
+		fmt.Println("Invalid request")
+		u.Respond(w, u.Message(false, "Invalid request"))
+		return
+	}
+	resp := topic.Delete()
+	u.Respond(w, resp)
+}
+
 var CreateTopic = func(w http.ResponseWriter, r *http.Request) {
 	topic := &models.Topic{}
 	err := json.NewDecoder(r.Body).Decode(topic)
