@@ -141,17 +141,12 @@ func (user *User) GetsUserInfo(id uint) (map[string]interface{}) {
 	}
 	defer db.Close()
 
-	results, err := db.Query("SELECT * from users ")
-	defer results.Close()
+	row :=  db.QueryRow("SELECT * from users where id=?", id).Scan(&user.Id, &user.UserData.Email, &user.UserData.PasswordHash)
+	fmt.Println(row)
+	
+	defer db.Close()
 
-	for (results.Next()) {
-		err = results.Scan(&user.Id, &user.UserData.Email, &user.UserData.PasswordHash)
-		if(user.Id == id){
-			resp := u.Message(true, "GetsUserInfo success")
-			resp["user"] = user
-			return resp
-		}
-	}
-	fmt.Println("erorr")
-	return u.Message(false, "GetsUserInfo error")
+	resp := u.Message(true, "GetsUserInfo success")
+	resp["user"] = user
+	return resp
 }
