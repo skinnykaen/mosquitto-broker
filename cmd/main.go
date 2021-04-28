@@ -9,7 +9,6 @@ import (
 
 func main() {
 	srv := Go.NewServer()
-
 	log.Fatal(http.ListenAndServe(":8000", srv))
 
 }

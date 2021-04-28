@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/skinnykaen/go.git/models"
+	"github.com/skinnykaen/go.git/mosquitto"
 	u "github.com/skinnykaen/go.git/utils"
 	"net/http"
 )
@@ -27,6 +28,8 @@ var CreateAccount = func(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := user.Create() //Создать аккаунт
+	args := []string{"-b","passwd.txt", user.UserData.Email, user.UserData.Password}
+	mosquitto.RunCommand("mosquitto_passwd", args...) //Записать в passwd
 	u.Respond(w, resp)
 }
 
@@ -46,6 +49,6 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 	//		Expires: expirationTime,
 	//})
 
-	resp := models.Login(user.UserData.Email, user.UserData.PasswordHash)
+	resp := models.Login(user.UserData.Email, user.UserData.Password)
 	u.Respond(w, resp)
 }
