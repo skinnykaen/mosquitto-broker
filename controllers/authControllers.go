@@ -30,6 +30,7 @@ var CreateAccount = func(w http.ResponseWriter, r *http.Request) {
 	resp := user.Create() //Создать аккаунт
 	args := []string{"-b","passwd.txt", user.UserData.Email, user.UserData.Password}
 	mosquitto.RunCommand("mosquitto_passwd", args...) //Записать в passwd
+	mosquitto.WriteToAclFile(user.UserData.Email) //Записать в acl
 	u.Respond(w, resp)
 }
 

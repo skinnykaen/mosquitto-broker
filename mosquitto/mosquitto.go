@@ -3,6 +3,7 @@ package mosquitto
 import (
 	"bytes"
 	"log"
+	"os"
 	"os/exec"
 	"syscall"
 )
@@ -37,4 +38,17 @@ func RunCommand(name string, args ...string) (stdout string, stderr string, exit
 	}
 	log.Printf("command result, stdout: %v, stderr: %v, exitCode: %v", stdout, stderr, exitCode)
 	return
+}
+
+func WriteToAclFile (username string) {
+	f, err := os.OpenFile("mosquitto.acl",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+	data := "user " + username + "\r\ntopic " + username + "/#\r\n"
+	if _, err := f.WriteString(data); err != nil {
+		log.Println(err)
+	}
 }
