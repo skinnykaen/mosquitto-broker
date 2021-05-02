@@ -18,6 +18,7 @@ var DeleteTopic = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := topic.Delete()
+	//mosquitto.DeleteFromAclFile("rupychman@mail.ru")
 	u.Respond(w, resp)
 }
 

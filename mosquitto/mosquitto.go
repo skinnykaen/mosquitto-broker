@@ -1,7 +1,10 @@
 package mosquitto
 
 import (
+	"bufio"
 	"bytes"
+	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -51,4 +54,49 @@ func WriteToAclFile (username string) {
 	if _, err := f.WriteString(data); err != nil {
 		log.Println(err)
 	}
+}
+
+func DeleteFromAclFile (username string) {
+
+	file, err := os.Open("mosquitto.acl")
+	if err != nil {
+		log.Fatalf("Error when opening file: %s", err)
+	}
+
+	tmp, err := ioutil.TempFile("d:/main/working/mosquitto", "replace-*")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tmp.Close()
+
+	if err := replace(file, tmp, username); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := tmp.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.Rename(tmp.Name(), "mosquitto.acl"); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func replace(r io.Reader, w io.Writer, username string) error {
+	firstLine := "user " + username
+	secondLine := "topic " + username +"/#"
+	sc := bufio.NewScanner(r)
+	for sc.Scan() {
+		line := sc.Text()
+		if line != firstLine && line != secondLine {
+			if _, err := io.WriteString(w, line+"\n"); err != nil {
+				return err
+			}
+		}
+	}
+	return sc.Err()
 }
