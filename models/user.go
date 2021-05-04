@@ -41,10 +41,7 @@ func (user *User) Create () (map[string]interface{}) {
 
 	row :=  db.QueryRow("SELECT * from users where email=?", user.UserData.Email).Scan(&fakeUser.Id, &fakeUser.UserData.Email, &fakeUser.UserData.Password)
 	if(row == sql.ErrNoRows){
-
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.UserData.Password), bcrypt.DefaultCost)
-		fmt.Println(hashedPassword)
-		fmt.Println(len(hashedPassword))
 		results, err := db.Exec("INSERT INTO users (email, passwordhash) values (?, ?)", user.UserData.Email, hashedPassword)
 		log.Print(results)
 		if err != nil {
@@ -64,51 +61,6 @@ func (user *User) Create () (map[string]interface{}) {
 		return u.Message(false, "User already exists")
 	}
 }
-
-//func (user *User) Create () (map[string]interface{}) {
-//	var response string = NewUser(user.UserData.Email, user.UserData.Password)
-//
-//	switch(response){
-//	case "success":
-
-
-//		tk := Token{UserId: user.Id}
-//		token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-//		tokenString, _ := token.SignedString(jwtKey)
-//		user.Token = tokenString
-//		fmt.Println("Account has been created")
-//		response := u.Message(true, "Account has been created")
-//		response["user"] = user
-//		return response
-//	default:
-//		fmt.Println("User already exists")
-//		return u.Message(false, "User already exists")
-//	}
-//}
-//
-//func NewUser (emailForm, passwordForm string) string{
-//	const res1 = "success"
-//	const res2  = "email_already_exists"
-//	var found bool
-//
-//	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
-//
-//	row :=  db.QueryRow("SELECT * from users where email=?", emailForm)
-//
-//	found, _, _ = FoundEmail(emailForm)
-//	if(found){
-//		return res2
-//	}
-//
-//	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(passwordForm), bcrypt.DefaultCost)
-//
-//	results, err := db.Exec("INSERT INTO users (email, passwordhash) values (?, ?)", emailForm, hashedPassword)
-//	log.Print(results)
-//	if err != nil {
-//		panic(err.Error())
-//	}
-//	return res1
-//}
 
 func Login (emailForm, passwordForm string) (map[string]interface{}) {
 	user := &User{}
@@ -133,7 +85,6 @@ func Login (emailForm, passwordForm string) (map[string]interface{}) {
 			return u.Message(false, "Invalid login credentials. Please try again")
 		}
 		user.UserData.Email = emailForm
-		user.UserData.Password= ""
 
 		tk := &Token{UserId: user.Id}
 		token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
@@ -147,71 +98,6 @@ func Login (emailForm, passwordForm string) (map[string]interface{}) {
 	}
 }
 
-//func Login (email, password string) (map[string]interface{}) {
-//
-//	user := &User{}
-//	user.UserData.Email = email
-//	user.UserData.Password = password
-//
-//	switch CheckEmail(user) {
-//	case res1:
-//		user.UserData.Email = email
-//		user.UserData.Password= ""
-//
-//		tk := &Token{UserId: user.Id}
-//		token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-//		tokenString, _ := token.SignedString(jwtKey)
-//		user.Token = tokenString // Сохраните токен в ответе
-//
-//		fmt.Println("Logged In")
-//		resp := u.Message(true, "Logged In")
-//		resp["user"] = user
-//		return resp
-//	default:
-//		fmt.Println("!Logged In")
-//		return u.Message(false, "Invalid login credentials. Please try again")
-//	}
-//
-//}
-//
-//func CheckEmail (user *User) string{
-//	var found bool
-//	var passwordhashDb string
-//	var userId uint
-//
-//	found, userId, passwordhashDb = FoundEmail(user.UserData.Email)
-//	if(found){
-//		if(passwordhashDb == user.UserData.Password) {
-//			user.Id = userId
-//			return res1
-//		}else {
-//			return res3
-//		}
-//	}else {
-//		return res2
-//	}
-//	return "error"
-//}
-//
-//func FoundEmail (emailForm string) (bool, uint, string) {
-//	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
-//	if err != nil {
-//		panic(err.Error())
-//	}
-//	defer db.Close()
-//
-//	results, err := db.Query("SELECT * from users ")
-//	defer results.Close()
-//	var user User
-//
-//	for (results.Next()) {
-//		err = results.Scan(&user.Id, &user.UserData.Email, &user.UserData.Password)
-//		if(user.UserData.Email == emailForm){
-//			return true, user.Id, user.UserData.Password
-//		}
-//	}
-//	return false, 0, ""
-//}
 
 func (user *User) GetsUserInfo(id uint) (map[string]interface{}) {
 	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")

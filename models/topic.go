@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	u "github.com/skinnykaen/go.git/utils"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Topic struct {
@@ -22,8 +23,19 @@ type TopicData struct {
 
 func (topic *Topic) Create () (map[string]interface{}){
 	db, err := sql.Open("mysql", "root:skinny@tcp(127.0.0.1:3306)/mqtt_broker")
-
-	topics, err := db.Exec("INSERT INTO topics (name, password, mqtt_tcp_port, secure_mqtt, mqtt_over_websocket_port, id_user) values (?,?,?,?,?,?)", topic.TopicData.Name, topic.TopicData.Password , 1883, 3883, 8883, topic.Id_User)
+	var passwordhash []byte
+	fmt.Println(topic.TopicData.Password )
+	if(topic.TopicData.Password  == ""){
+		err =  db.QueryRow("SELECT passwordhash from users where id=?", topic.Id_User).Scan(&topic.TopicData.Password)
+		if err != nil{
+			panic(err.Error())
+		}
+		passwordhash = []byte(topic.TopicData.Password)
+	}else{
+		passwordhash, _ = bcrypt.GenerateFromPassword([]byte(topic.TopicData.Password), bcrypt.DefaultCost)
+	}
+	
+	topics, err := db.Exec("INSERT INTO topics (name, password, mqtt_tcp_port, secure_mqtt, mqtt_over_websocket_port, id_user) values (?,?,?,?,?,?)", topic.TopicData.Name, passwordhash, 1883, 3883, 8883, topic.Id_User)
 	if err != nil {
 		panic(err.Error())
 	}
