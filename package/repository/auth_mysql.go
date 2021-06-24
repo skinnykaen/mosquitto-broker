@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/skinnykaen/mqtt-broker"
 )
@@ -15,10 +16,11 @@ func NewAuthMysql(db *sql.DB) *AuthMysql {
 }
 
 func (r *AuthMysql) CreateUser(user mqtt.User) (error) {
+	//Строка запроса
 	query := fmt.Sprintf("INSERT INTO %s (Email, Password) values (?, ?)", usersTable)
 	_, err := r.db.Exec(query, user.UserData.Email, user.UserData.Password)
 	 if err != nil {
-		return  err
+		 return errors.New("Internal error")
 	}
 	return nil
 }

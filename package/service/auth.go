@@ -29,7 +29,9 @@ func NewAuthService(repo *repository.Repository) *AuthService {
 }
 
 func (s *AuthService) CreateUser(user mqtt.User) (error) {
+	//генерация хэша пароля
 	user.UserData.Password = generatePasswordHash(user.UserData.Password)
+	//Проверка на уже имеющегося пользователя
 	if(s.repo.FindUser(user.UserData.Email)){
 		return errors.New("User already exist")
 	}

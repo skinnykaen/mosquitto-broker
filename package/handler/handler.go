@@ -20,6 +20,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/sign-in", h.signIn)
+		auth.DELETE("/sign-out", h.signOut)
 	}
 
 	api := router.Group("/api", h.userIdentity)
@@ -27,8 +28,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		profile := api.Group("/profile")
 		{
 			profile.GET("/me", h.getProfile)
-			profile.POST("/mosquitto", h.mosquittoOn)
-			profile.DELETE("/mosquitto", h.mosquittoOff)
+		}
+		mosquitto := api.Group("/mosquitto")
+		{
+			mosquitto.POST("/launch", h.MosquittoLaunch)
 		}
 		topics := api.Group("/topics")
 		{

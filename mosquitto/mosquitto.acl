@@ -2,9 +2,7 @@ user rupychman@mail.ru
 topic rupychman@mail.ru/#
 user tortancs@mail.ru
 topic tortancs@mail.ru/#
-user test2@mail.ru
-topic test2@mail.ru/#
-user test3@mail.ru
-topic test3@mail.ru/#
-user 1@mail.ru
-topic 1@mail.ru/#
+user newtestuser@mail.ru
+topic newtestuser@mail.ru/
+user newuser@mail.ru
+topic newuser@mail.ru/#

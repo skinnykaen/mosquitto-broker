@@ -21,21 +21,3 @@ func (r *ProfileMysql) GetProfile(id uint) (mqtt.User, error) {
 	err := row.Scan(&user.Id, &user.UserData.FirstName, &user.UserData.LastName, &user.UserData.Email, &user.UserData.Password, &user.UserData.MossquittoOn)
 	return user, err
 }
-
-func (r *ProfileMysql) SetMosquittoOn(id uint) (error) {
-	query := fmt.Sprintf("UPDATE %s SET MosquittoOn=1 WHERE User_Id=?", usersTable)
-	_, err := r.db.Exec(query, id)
-	if err != nil {
-		return  err
-	}
-	return nil
-}
-
-func (r *ProfileMysql) SetMosquittoOff(id uint) (error) {
-	query := fmt.Sprintf("UPDATE %s SET MosquittoOn=0 WHERE User_Id=?", usersTable)
-	_, err := r.db.Exec(query, id)
-	if err != nil {
-		return  err
-	}
-	return nil
-}

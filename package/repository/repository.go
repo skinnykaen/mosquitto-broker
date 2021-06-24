@@ -13,8 +13,6 @@ type Authorization interface {
 
 type Profile interface {
 	GetProfile(id uint) (mqtt.User, error)
-	SetMosquittoOn(id uint) (error)
-	SetMosquittoOff(id uint) (error)
 }
 
 type Topics interface {
@@ -24,10 +22,17 @@ type Topics interface {
 	Delete(idTopic int) error
 }
 
+type Mosquitto interface {
+	SetMosquittoOn(id uint) (error)
+	SetMosquittoOff(id uint) (error)
+	GetMosquittoOn(id uint) (bool, error)
+}
+
 type Repository struct {
 	Authorization
 	Profile
 	Topics
+	Mosquitto
 }
 
 func NewRepository(db *sql.DB) *Repository {
@@ -35,5 +40,6 @@ func NewRepository(db *sql.DB) *Repository {
 		Authorization: NewAuthMysql(db),
 		Profile: NewProfileMysql(db),
 		Topics: NewTopicsMysql(db),
+		Mosquitto: NewMosquittoMysql(db),
 	}
 }

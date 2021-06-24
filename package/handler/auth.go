@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/skinnykaen/mqtt-broker"
-	"github.com/skinnykaen/mqtt-broker/mosquitto"
 	"github.com/skinnykaen/mqtt-broker/utils"
 	"net/http"
-	"os"
 )
 
 func(h *Handler) signUp(c *gin.Context){
@@ -21,16 +19,15 @@ func(h *Handler) signUp(c *gin.Context){
 	inputPass := input.UserData.Password
 
 	err := h.services.Authorization.CreateUser(input)
-	fmt.Println(err)
+
 	if err != nil {
 		resp := utils.Message(false, err.Error())
-		utils.Respond(c, http.StatusInternalServerError, resp)
+		utils.Respond(c, http.StatusOK, resp)
 		return
 	}
 
-	args := []string{"-b", os.Getenv("MOSQUITTO_DIR_FILE") + "passwd", input.UserData.Email, inputPass}
-	go mosquitto.RunCommand(os.Getenv("MOSQUITTO_DIR_EXE") + "mosquitto_passwd", args...) //Записать в passwd
-	go mosquitto.WriteToAclFile(input.UserData.Email) //Записать в acl
+	h.services.Mosquitto.MosquittoPasswd(input.UserData.Email, inputPass)
+	h.services.Mosquitto.MosquittoAcl(input.UserData.Email)
 
 	resp := utils.Message(true, "User was created")
 	utils.Respond(c, http.StatusOK, resp)
@@ -46,12 +43,19 @@ func(h *Handler) signIn(c *gin.Context){
 
 	token, err := h.services.Authorization.GenerateToken(input.UserData.Email, input.UserData.Password)
 	if err != nil {
-		resp := utils.Message(false, "Invalid login Credentials")
-		utils.Respond(c, http.StatusInternalServerError, resp)
+		resp := utils.Message(false, err.Error())
+		utils.Respond(c, 200, resp)
 		return
 	}
 
 	resp := utils.Message(true, "Logged in!")
 	resp["token"] = token
+	utils.Respond(c, http.StatusOK, resp)
+}
+
+func(h *Handler) signOut(c *gin.Context){
+	h.services.Mosquitto.MosquittoStop()
+	fmt.Println("Mosquitto выключено")
+	resp := utils.Message(true, "Logout")
 	utils.Respond(c, http.StatusOK, resp)
 }

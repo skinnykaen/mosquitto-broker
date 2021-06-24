@@ -13,8 +13,6 @@ type Authorization interface {
 
 type Profile interface {
 	GetProfile(id uint)(mqtt.User, error)
-	SetMosquittoOn(id uint) (error)
-	SetMosquittoOff(id uint) (error)
 }
 
 type Topics interface {
@@ -23,8 +21,19 @@ type Topics interface {
 	Delete(idTopic int) error
 }
 
+type Mosquitto interface {
+	MosquittoRun()
+	MosquittoStop()
+	MosquittoPasswd(email, password string)
+	MosquittoAcl(email string)
+	SetMosquittoOn(id uint) (error)
+	SetMosquittoOff(id uint) (error)
+	GetMosquittoOn(id uint) (bool, error)
+}
+
 type Service struct {
 	Authorization
+	Mosquitto
 	Profile
 	Topics
 }
@@ -33,5 +42,6 @@ func NewService(repos *repository.Repository) *Service {
 		Authorization: NewAuthService(repos),
 		Profile: NewProfileService(repos),
 		Topics: NewTopicsService(repos),
+		Mosquitto:NewMosquittoService(repos),
 	}
 }

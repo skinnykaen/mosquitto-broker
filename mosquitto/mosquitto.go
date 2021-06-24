@@ -15,6 +15,7 @@ const defaultFailedCode = 1
 
 func RunCommand(name string, args ...string) (stdout string, stderr string, exitCode int) {
 	log.Println("run command:", name, args)
+
 	var outbuf, errbuf bytes.Buffer
 	cmd := exec.Command(name, args...)
 	cmd.Stdout = &outbuf
@@ -23,13 +24,6 @@ func RunCommand(name string, args ...string) (stdout string, stderr string, exit
 	err := cmd.Run()
 	stdout = outbuf.String()
 	stderr = errbuf.String()
-
-	//select {
-	//case <-ctx.Done():
-	//	ch <- true
-	//	return
-	//default:
-	//}
 
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
@@ -50,8 +44,8 @@ func RunCommand(name string, args ...string) (stdout string, stderr string, exit
 	return
 }
 
-func WriteToAclFile (username string) {
-	f, err := os.OpenFile(os.Getenv("MOSQUITTO_DIR_FILE") + "mosquitto.acl",
+func WriteToAclFile(username string) {
+	f, err := os.OpenFile(os.Getenv("MOSQUITTO_DIR_FILE")+"mosquitto.acl",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
@@ -65,7 +59,7 @@ func WriteToAclFile (username string) {
 	}
 }
 
-func DeleteFromAclFile (username string) {
+func DeleteFromAclFile(username string) {
 
 	file, err := os.Open(os.Getenv("MOSQUITTO_DIR_FILE") + "mosquitto.acl")
 	if err != nil {
@@ -90,14 +84,14 @@ func DeleteFromAclFile (username string) {
 		log.Fatal(err)
 	}
 
-	if err := os.Rename(tmp.Name(), os.Getenv("MOSQUITTO_DIR_FILE") + "mosquitto.acl"); err != nil {
+	if err := os.Rename(tmp.Name(), os.Getenv("MOSQUITTO_DIR_FILE")+"mosquitto.acl"); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func replace(r io.Reader, w io.Writer, username string) error {
 	firstLine := "user " + username
-	secondLine := "topic " + username +"/#"
+	secondLine := "topic " + username + "/#"
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
 		line := sc.Text()
