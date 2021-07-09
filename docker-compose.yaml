@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
 
   react:
-    build: ../../React/mqtt_broker
+    build: ../mqtt_broker_react
     ports:
     - "80:80"
 
