@@ -16,17 +16,18 @@ func NewMosquittoService(repo *repository.Repository) *MosquittoService {
 
 func (s *MosquittoService) MosquittoRun() {
 	args := []string{"-c", os.Getenv("MOSQUITTO_DIR_FILE") + "mosquitto.conf", "-v"}
-	go mosquitto.RunCommand(os.Getenv("MOSQUITTO_DIR_EXE") + "mosquitto.exe", args...)
+	//args := []string{"-v"}
+	go mosquitto.RunCommand(os.Getenv("MOSQUITTO_DIR_EXE") + "mosquitto", args...)
 }
 
 func (s *MosquittoService) MosquittoStop() {
-	args := []string{"/IM","mosquitto.exe", "/F"}
-	go mosquitto.RunCommand("taskkill", args...)
+	args := []string{"-9", "mosquitto"}
+	go mosquitto.RunCommand("pkill", args...)
 }
 
 func (s *MosquittoService) MosquittoPasswd(email, password string) {
-	args := []string{"-b", os.Getenv("MOSQUITTO_DIR_FILE") + "passwd.txt", email, password}
-	go mosquitto.RunCommand(os.Getenv("MOSQUITTO_DIR_EXE") + "mosquitto_passwd", args...)
+	args := []string{"-b", os.Getenv("MOSQUITTO_DIR_FILE") + "passwordfile", email, password}
+	go mosquitto.RunCommand("mosquitto_passwd", args...)
 }
 
 func (s *MosquittoService) MosquittoAcl(email string){

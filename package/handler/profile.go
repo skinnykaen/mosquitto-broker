@@ -19,7 +19,7 @@ func (h *Handler) getProfile(c *gin.Context) {
 		return
 	}
 
-	if(user.UserData.MossquittoOn){
+	if(user.UserData.MosquittoOn){
 		h.services.Mosquitto.MosquittoRun()
 		fmt.Println("Mosquitto включено")
 	}

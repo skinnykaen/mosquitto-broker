@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  mqtt_broker_app:
+    build: ./
+    command: ./mqtt_broker
+    ports:
+      - 8000:8080
+    depends_on:
+      - db
+      - mosquitto
+      - react
+    environment:
+      - DB_PASSWORD=qwerty
+
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - 1884:1884
+      - 8883:8883
+    restart: unless-stopped
+
+  react:
+    build: ../../React/mqtt_broker
+    ports:
+    - "80:80"
+
+  db:
+    restart: always
+    image: mysql:5.7
+    container_name: mqtt_broker_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: ""
+      MYSQL_DATABASE: ""
+    ports:
+    - '3306:3305'
+

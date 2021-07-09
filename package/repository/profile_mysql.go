@@ -18,6 +18,6 @@ func (r *ProfileMysql) GetProfile(id uint) (mqtt.User, error) {
 	var user mqtt.User
 	query := fmt.Sprintf("SELECT * FROM %s WHERE User_Id=?", usersTable)
 	row := r.db.QueryRow(query, id)
-	err := row.Scan(&user.Id, &user.UserData.FirstName, &user.UserData.LastName, &user.UserData.Email, &user.UserData.Password, &user.UserData.MossquittoOn)
+	err := row.Scan(&user.Id, &user.UserData.FirstName, &user.UserData.LastName, &user.UserData.Email, &user.UserData.Password, &user.UserData.MosquittoOn)
 	return user, err
 }

@@ -24,6 +24,7 @@ func RunCommand(name string, args ...string) (stdout string, stderr string, exit
 	err := cmd.Run()
 	stdout = outbuf.String()
 	stderr = errbuf.String()
+	//log.Printf("command result, stdout: %v, stderr: %v, exitCode: %v", stdout, stderr, exitCode)
 
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
